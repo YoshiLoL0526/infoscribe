@@ -6,7 +6,6 @@ LICENSE
 .gitignore
 .github
 .venv
-.env
 logs
 node_modules
 dist
