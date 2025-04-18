@@ -1,0 +1,217 @@
+{
+  "name": "Print AI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ask",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "1f3e28b5-fa78-4d4a-981b-66f86c5aa5d9",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        100
+      ],
+      "webhookId": "c5d5af84-c750-4803-8ad8-d80263d5a155"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6a432a29-3806-4703-999d-6fac94caf7e9",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        180,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.query }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant that provides information about books and technology news headlines. Based on the user's query, you will decide which tool to use and provide a helpful response."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -340,
+        100
+      ],
+      "id": "9d23bcbd-41ee-40f0-8ea8-05e4b0e86c77",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get information about books from the database based on query parameters like category. Categories must be in English.",
+        "url": "https://7d52-45-226-81-153.ngrok-free.app/api/v1/books",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "category",
+              "valueProvider": "modelOptional"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -60,
+        320
+      ],
+      "id": "3e68a25e-13b6-4c0b-9af9-0c9dec5a1899",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get current trending headlines from Hacker News.",
+        "url": "https://7d52-45-226-81-153.ngrok-free.app/api/v1/headlines",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "limit",
+              "valueProvider": "modelOptional"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -180,
+        320
+      ],
+      "id": "916ad26a-3ea2-4580-a8fb-069890827e63",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -440,
+        320
+      ],
+      "id": "8f79d093-1831-496f-a49a-381188e38627",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "095gLiakgLKggIL2",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.headers['x-real-ip'] }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        320
+      ],
+      "id": "abcde374-938a-4fa2-af6a-84c3d33e0177",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "091f48e9-d36e-405d-a9d1-b0ba4393599e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca3a9bb50630348fcace5252bf4bf4f18920e264260b0a004e38ca7a7424733d"
+  },
+  "id": "MBwg8rEfEAurZ8Q6",
+  "tags": []
+}
