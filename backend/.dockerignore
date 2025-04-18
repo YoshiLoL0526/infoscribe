@@ -6,5 +6,4 @@ LICENSE
 .gitignore
 .github
 .venv
-.env
 logs

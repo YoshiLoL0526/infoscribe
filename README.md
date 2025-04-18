@@ -1,10 +1,31 @@
-# Print AI Assessment
+# 🧠 Print AI Assessment
 
-## Setup instructions
+## 🚀 Setup instructions
 
-**Command**: `docker-compose up`
+### Environment vars
 
-## Example queries
+- Backend:
+
+```env
+REDIS_HOST = 127.0.0.1
+REDIS_PORT = 6379
+```
+
+- Frontend
+
+```env
+VITE_REACT_N8N_URL=http://route-to-n8n-webhook/ask
+```
+
+### Start the project
+
+**Command**:
+
+```bash
+docker-compose up
+```
+
+## 💬 Example queries
 
 ### Example 1
 
@@ -46,7 +67,7 @@ Would you like more information about any of these books?"
 - Score: 48
 If you want more details about any specific headline or more articles, feel free to ask!"
 
-## Redis schema
+## 🗃️ Redis schema
 
 **Key pattern**: `book:<id>` or `book:<category>`
 
@@ -62,6 +83,6 @@ If you want more details about any specific headline or more articles, feel free
 - `price`: Float (Price of the book)
 - `image_url`: String (Image url of the book)
 
-## n8n Webhook
+## 🔗 N8N Webhook
 
 **Endpoint**: `https://yoshi-team.app.n8n.cloud/webhook/ask`
