@@ -20,7 +20,11 @@ async def init_books(redis_service: RedisService = Depends(get_redis_service)):
     Endpoint para inicializar la base de datos con libros extraídos de la web.
     Este endpoint debe ser llamado durante la inicialización del contenedor.
     """
-    scraper = BookScraper(base_url=settings.BOOK_SCRAPER_URL)
+    scraper = BookScraper(
+        base_url=settings.BOOK_SCRAPER_URL,
+        redis_host=settings.REDIS_HOST,
+        redis_port=settings.REDIS_PORT,
+    )
     books = await scraper.scrape_books()
 
     if not books:
