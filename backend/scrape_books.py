@@ -70,13 +70,15 @@ class BookScraper:
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
         self.total_books_collected = 0
         self.book_collection_lock = asyncio.Lock()
+        self.logs_dir = logs_dir
 
         # Configuración del logger
+        os.makedirs(self.logs_dir, exist_ok=True)
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             handlers=[
-                logging.FileHandler(os.path.join(logs_dir, "book_scraper.log")),
+                logging.FileHandler(os.path.join(self.logs_dir, "book_scraper.log")),
                 logging.StreamHandler(),
             ],
         )
@@ -194,7 +196,11 @@ class BookScraper:
                 book_id = hashlib.md5(title.encode()).hexdigest()
 
                 book = Book(
-                    id=book_id, title=title, price=price, category=category, image_url=image_url
+                    id=book_id,
+                    title=title,
+                    price=price,
+                    category=category,
+                    image_url=image_url,
                 )
                 books.append(book)
 
