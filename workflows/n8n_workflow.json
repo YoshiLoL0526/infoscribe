@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        -660,
+        -560,
         100
       ],
       "webhookId": "c5d5af84-c750-4803-8ad8-d80263d5a155"
@@ -27,7 +27,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        180,
+        40,
         100
       ]
     },
@@ -51,7 +51,7 @@
     {
       "parameters": {
         "toolDescription": "Get information about books from the database based on query parameters like category. Categories must be in English.",
-        "url": "https://7d52-45-226-81-153.ngrok-free.app/api/v1/books",
+        "url": "https://backend:7013/api/v1/books",
         "sendQuery": true,
         "parametersQuery": {
           "values": [
@@ -74,7 +74,7 @@
     {
       "parameters": {
         "toolDescription": "Get current trending headlines from Hacker News.",
-        "url": "https://7d52-45-226-81-153.ngrok-free.app/api/v1/headlines",
+        "url": "https://backend:7013/api/v1/headlines",
         "sendQuery": true,
         "parametersQuery": {
           "values": [
@@ -203,11 +203,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "091f48e9-d36e-405d-a9d1-b0ba4393599e",
+  "versionId": "c0c77f42-fe2a-4467-9b18-3c00d8c3dcae",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ca3a9bb50630348fcace5252bf4bf4f18920e264260b0a004e38ca7a7424733d"

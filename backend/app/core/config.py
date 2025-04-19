@@ -13,6 +13,8 @@ class Settings:
     REDIS_DB: int = int(os.getenv("REDIS_DB", 0))
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
 
+    REMOTE_DRIVER_URL = os.getenv("REMOTE_DRIVER_URL")
+
     HACKER_NEWS_API_URL: str = "https://news.ycombinator.com/"
     BOOK_SCRAPER_URL: str = os.getenv("BOOK_SCRAPER_URL", "http://books.toscrape.com")
 

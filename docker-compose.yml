@@ -31,9 +31,9 @@ services:
    depends_on:
      - redis
    environment:
-     - REDIS_HOST=recruiter-dev-redis
-     - REDIS_PORT=6379
-     - REMOTE_DRIVER_URL=recruiter-dev-selenium
+     - REDIS_HOST=${REDIS_HOST}
+     - REDIS_PORT=${REDIS_PORT}
+     - REMOTE_DRIVER_URL=${REMOTE_DRIVER_URL}
 
  frontend:
    build:
@@ -43,8 +43,8 @@ services:
      - "3000:80"
   #  volumes:
   #    - ./frontend:/frontend
-   environment:
-     - VITE_REACT_APP_API_URL=https://yoshi-team.app.n8n.cloud/webhook/ask
+  #  environment:
+  #    - VITE_REACT_N8N_URL=${VITE_REACT_N8N_URL}
    depends_on:
      - n8n
 
@@ -54,19 +54,19 @@ services:
    ports:
      - "5678:5678"
    environment:
-     - N8N_BASIC_AUTH_ACTIVE=true
-     - N8N_BASIC_AUTH_USER=admin
-     - N8N_BASIC_AUTH_PASSWORD=admin
-     - N8N_HOST=n8n
-     - N8N_PORT=5678
-     - REDIS_HOST=redis
-     - REDIS_PORT=6379
-     - N8N_SECURE_COOKIE=false
+     - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-true}
+     - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+     - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-admin}
+     - N8N_HOST=${N8N_HOST:-localhost}
+     - N8N_PORT=${N8N_PORT}
+     - REDIS_HOST=${REDIS_HOST}
+     - REDIS_PORT=${REDIS_PORT}
+     - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
    volumes:
      - n8n_data:/home/node/.n8n
    depends_on:
      - redis
-#      - backend
+     - backend
 
 volumes:
  redis_data:
