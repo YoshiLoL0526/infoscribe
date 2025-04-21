@@ -6,6 +6,7 @@ export const ChatProvider = ({ children }) => {
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [typingStatus, setTypingStatus] = useState(false);
 
     const addMessage = (text, isUser = true) => {
         setMessages(prev => [...prev, { id: Date.now(), text, isUser }]);
@@ -42,6 +43,7 @@ export const ChatProvider = ({ children }) => {
             messages,
             isLoading,
             error,
+            typingStatus,
             processMessage,
             resetConversation
         }}>

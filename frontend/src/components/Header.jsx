@@ -1,8 +1,12 @@
 import React from 'react';
+import ThemeToggle from './ThemeToggle';
+import { useTheme } from '../contexts/theme-context';
 
 const Header = () => {
+    const { isDark } = useTheme();
+
     return (
-        <header className="bg-blue-600 text-white p-4 shadow-md">
+        <header className={`${isDark ? 'bg-blue-900' : 'bg-blue-600'} text-white p-4 shadow-md transition-colors duration-300`}>
             <div className="container mx-auto flex items-center justify-between">
                 <div className="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -10,6 +14,7 @@ const Header = () => {
                     </svg>
                     <h1 className="text-xl font-bold">Print AI Assessment</h1>
                 </div>
+                <ThemeToggle />
             </div>
         </header>
     );
