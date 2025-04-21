@@ -63,10 +63,19 @@ services:
      - REDIS_PORT=${REDIS_PORT}
      - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
    volumes:
+     - ./workflows:/workflows
      - n8n_data:/home/node/.n8n
    depends_on:
      - redis
      - backend
+   entrypoint: >
+      sh -c "
+        n8n import:workflow --input /workflows/n8n_workflow.json &&
+        n8n import:credentials --input /workflows/n8n_credentials.json &&
+        n8n update:workflow --id VV8VW3wNzoXBoF1L --active=true &&
+        n8n update:workflow --id Y0kyqHk3gar46LaE --active=true &&
+        n8n start
+      "
 
 volumes:
  redis_data:

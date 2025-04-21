@@ -9,12 +9,17 @@ body {
     -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Para hacer que los mensajes de respuesta (no del usuario) tengan una animación de carga */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+@keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+}
   
-  .message-animation {
-    animation: fadeIn 0.3s ease-in-out;
-  }
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
