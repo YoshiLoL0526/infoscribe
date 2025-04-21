@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from app.core.config import settings
 from app.models.schemas import Book
 from app.services.redis_service import RedisService, get_redis_service
-from scrape_books import BookScraper
+from app.scraping.scrape_books import BookScraper
 
 router = APIRouter()
 

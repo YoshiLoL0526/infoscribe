@@ -209,18 +209,9 @@ class HackerNewsIntegration:
 
         return {"title": title, "url": url, "score": score, "domain": domain}
 
-    async def fetch_top_stories(
-        self, limit: int = 5, pages: int = 5
-    ) -> List[Dict[str, Union[str, int]]]:
+    async def fetch_top_stories(self, limit: int = 5, pages: int = 5) -> List[Dict[str, Union[str, int]]]:
         """
         Fetch top stories from Hacker News asynchronously, up to a specified limit.
-
-        Args:
-            limit: The maximum number of stories to fetch.
-            pages: Maximum number of pages to fetch (used as a fallback if limit isn't reached).
-
-        Returns:
-            List of dictionaries containing story data, up to the specified limit.
         """
         stories = []
         semaphore = asyncio.Semaphore(2)  # Limit to 2 concurrent browser sessions
@@ -230,21 +221,20 @@ class HackerNewsIntegration:
             async with semaphore:
                 return await self._process_page(url, page)
 
-        # Creamos un grupo de tareas para poder gestionarlas
-        page_tasks = []
-        async with asyncio.TaskGroup() as task_group:
-            for page in range(1, pages + 1):
-                url = (
-                    "https://news.ycombinator.com/"
-                    if page == 1
-                    else f"https://news.ycombinator.com/news?p={page}"
-                )
-                page_tasks.append(task_group.create_task(bounded_process_page(url, page)))
-
-        # Procesamos los resultados a medida que se completan las tareas
-        for task in page_tasks:
-            page_result = task.result()
-
+        # Usar gather en lugar de TaskGroup
+        tasks = []
+        for page in range(1, pages + 1):
+            url = (
+                "https://news.ycombinator.com/"
+                if page == 1
+                else f"https://news.ycombinator.com/news?p={page}"
+            )
+            tasks.append(bounded_process_page(url, page))
+        
+        page_results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Procesar resultados
+        for page_result in page_results:
             if isinstance(page_result, list):
                 for story in page_result:
                     if fetched_count < limit:
@@ -255,6 +245,8 @@ class HackerNewsIntegration:
                 if fetched_count >= limit:
                     self.logger.info(f"Limit of {limit} stories reached. Stopping collection.")
                     break
+            elif isinstance(page_result, Exception):
+                self.logger.error(f"Error processing page: {page_result}")
             else:
                 self.logger.error(f"Error processing page: {page_result}")
 

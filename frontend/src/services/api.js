@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_REACT_N8N_URL;
+const API_URL = import.meta.env.VITE_REACT_N8N_URL ?? 'http://localhost:5678/webhook';
 
 export const sendMessage = async (payload) => {
     try {

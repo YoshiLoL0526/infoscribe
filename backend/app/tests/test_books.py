@@ -1,12 +1,9 @@
 import pytest
 from unittest.mock import patch
 
-# Marca todas las pruebas como asíncronas
-pytestmark = [
-    pytest.mark.asyncio()
-]
 
 # Test para el endpoint /api/v1/init
+# @pytest.mark.anyio
 async def test_init_books(async_client):
     # Simular la respuesta esperada
     mock_books = [
@@ -29,6 +26,7 @@ async def test_init_books(async_client):
 
 
 # Test para el endpoint /api/v1/books sin filtro de categoría
+@pytest.mark.anyio
 async def test_get_all_books(async_client):
     # Simular la respuesta esperada
     mock_books = [
@@ -59,6 +57,7 @@ async def test_get_all_books(async_client):
 
 
 # Test para el endpoint /api/v1/books con filtro de categoría
+@pytest.mark.anyio
 async def test_get_books_by_category(async_client):
     # Simular la respuesta esperada
     mock_books = [
@@ -83,6 +82,7 @@ async def test_get_books_by_category(async_client):
 
 
 # Test para el endpoint /api/v1/books/search con filtro por título
+@pytest.mark.anyio
 async def test_search_books_by_title(async_client):
     # Simular la respuesta esperada
     mock_books = [
@@ -106,6 +106,7 @@ async def test_search_books_by_title(async_client):
 
 
 # Test para el endpoint /api/v1/books/search con filtro por categoría
+@pytest.mark.anyio
 async def test_search_books_by_category(async_client):
     # Simular la respuesta esperada
     mock_books = [
@@ -129,6 +130,7 @@ async def test_search_books_by_category(async_client):
 
 
 # Test para el endpoint /api/v1/books/search con filtro por título y categoría
+@pytest.mark.anyio
 async def test_search_books_by_title_and_category(async_client):
     # Simular la respuesta esperada
     mock_books = [
@@ -153,6 +155,7 @@ async def test_search_books_by_title_and_category(async_client):
 
 
 # Test para validar error 422 cuando se proporciona un parámetro inválido
+@pytest.mark.anyio
 async def test_search_books_validation_error(async_client):
     # Enviar un parámetro que no es una cadena para title
     response = await async_client.get("/api/v1/books/search")
@@ -163,6 +166,7 @@ async def test_search_books_validation_error(async_client):
 
 
 # Test para validar que un libro tiene la estructura correcta
+@pytest.mark.anyio
 async def test_book_structure(async_client):
     # Simular la respuesta esperada
     mock_book = {

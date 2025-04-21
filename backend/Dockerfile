@@ -1,7 +1,7 @@
 FROM python:3.11-buster
 
 # 1.1 Establece /app como directorio de trabajo
-WORKDIR /app
+WORKDIR /backend
 
 # 1.2 Copia solo los archivos de definición de dependencias
 COPY . .
