@@ -37,7 +37,7 @@ const ChatMessage = ({ message }) => {
                 const titleMatch = bookXml.match(/<title>(.*?)<\/title>/);
                 const priceMatch = bookXml.match(/<price>(.*?)<\/price>/);
                 const imageMatch = bookXml.match(/<image>(.*?)<\/image>/);
-                const authorMatch = bookXml.match(/<author>(.*?)<\/author>/);
+                // const authorMatch = bookXml.match(/<author>(.*?)<\/author>/);
                 const categoryMatch = bookXml.match(/<category>(.*?)<\/category>/);
 
                 xmlBlocks.push({
@@ -46,7 +46,7 @@ const ChatMessage = ({ message }) => {
                         title: titleMatch ? titleMatch[1] : '',
                         price: priceMatch ? priceMatch[1] : '',
                         image: imageMatch ? imageMatch[1] : '',
-                        author: authorMatch ? authorMatch[1] : '',
+                        // author: authorMatch ? authorMatch[1] : '',
                         category: categoryMatch ? categoryMatch[1] : '',
                     },
                     startIndex: blockStartIndex,
@@ -55,7 +55,7 @@ const ChatMessage = ({ message }) => {
             }
 
             // Parse news XML blocks
-            const newsRegex = /<new>([\s\S]*?)<\/new>/g;
+            const newsRegex = /<headline>([\s\S]*?)<\/headline>/g;
             let newsMatch;
 
             while ((newsMatch = newsRegex.exec(xmlContent)) !== null) {
