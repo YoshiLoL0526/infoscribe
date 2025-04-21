@@ -1,6 +1,9 @@
+import sys, os
 import asyncio
 import pytest
-from httpx import AsyncClient
+import pytest_asyncio
+
+sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
 
 from app.main import app
 
@@ -12,7 +15,14 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def async_client():
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    """Yield a client that can be used to make async requests."""
+    from httpx import AsyncClient
+    from httpx._transports.asgi import ASGITransport
+    
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test"
+    ) as client:
         yield client

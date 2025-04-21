@@ -419,7 +419,7 @@ class BookScraper:
             return all_books
         finally:
             # Cerrar el cliente de Redis
-            await redis_client.close()
+            await redis_client.aclose()
 
 
 async def main():

@@ -35,18 +35,30 @@ services:
      - REDIS_PORT=${REDIS_PORT}
      - REMOTE_DRIVER_URL=${REMOTE_DRIVER_URL}
 
- frontend:
+ tests:
    build:
-     context: ./frontend
-   container_name: recruiter-dev-frontend
-   ports:
-     - "3000:80"
-  #  volumes:
-  #    - ./frontend:/frontend
-  #  environment:
-  #    - VITE_REACT_N8N_URL=${VITE_REACT_N8N_URL}
+     context: ./backend
+   container_name: recruiter-dev-tests
+   command: >
+     sh -c "
+       echo 'Esperando a que el backend esté listo...' &&
+       sleep 10 &&
+       echo 'Ejecutando pruebas...' &&
+       cd /backend &&
+       poetry run pytest -v
+     "
+   volumes:
+     - ./backend:/backend
    depends_on:
-     - n8n
+     - selenium
+     - redis
+     - backend
+   environment:
+     - REDIS_HOST=${REDIS_HOST}
+     - REDIS_PORT=${REDIS_PORT}
+     - REMOTE_DRIVER_URL=${REMOTE_DRIVER_URL}
+     - PYTEST_ADDOPTS="-v"
+     - PYTHONPATH=/backend
 
  n8n:
    image: n8nio/n8n
@@ -62,12 +74,14 @@ services:
      - REDIS_HOST=${REDIS_HOST}
      - REDIS_PORT=${REDIS_PORT}
      - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
+     - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED:-true}
    volumes:
      - ./workflows:/workflows
      - n8n_data:/home/node/.n8n
    depends_on:
      - redis
      - backend
+     - tests
    entrypoint: >
       sh -c "
         n8n import:workflow --input /workflows/n8n_workflow.json &&
@@ -76,6 +90,21 @@ services:
         n8n update:workflow --id Y0kyqHk3gar46LaE --active=true &&
         n8n start
       "
+
+ frontend:
+   build:
+     context: ./frontend
+   container_name: recruiter-dev-frontend
+   ports:
+     - "3000:80"
+  #  volumes:
+  #    - ./frontend:/frontend
+  #  environment:
+  #    - VITE_REACT_N8N_URL=${VITE_REACT_N8N_URL}
+   depends_on:
+     - n8n
+     - backend
+     - tests
 
 volumes:
  redis_data:

@@ -204,54 +204,62 @@ class HackerNewsIntegration:
             if score_element:
                 score_text = score_element.text
                 score = int(score_text.split()[0])
-        except (NoSuchElementException, ValueError) as e:
+        except ValueError as e:
             self.logger.debug(f"Story {story_id} has no score: {e}")
 
         return {"title": title, "url": url, "score": score, "domain": domain}
 
     async def fetch_top_stories(
-        self, pages: int = 5
+        self, limit: int = 5, pages: int = 5
     ) -> List[Dict[str, Union[str, int]]]:
         """
-        Fetch top stories from Hacker News asynchronously.
+        Fetch top stories from Hacker News asynchronously, up to a specified limit.
 
         Args:
-            pages: Number of pages to fetch (max 5).
+            limit: The maximum number of stories to fetch.
+            pages: Maximum number of pages to fetch (used as a fallback if limit isn't reached).
 
         Returns:
-            List of dictionaries containing story data.
+            List of dictionaries containing story data, up to the specified limit.
         """
         stories = []
-        pages = min(pages, 5)
-
-        # Create tasks for all pages - use semaphore to limit concurrent browser sessions
         semaphore = asyncio.Semaphore(2)  # Limit to 2 concurrent browser sessions
+        fetched_count = 0
 
         async def bounded_process_page(url, page):
             async with semaphore:
                 return await self._process_page(url, page)
 
-        tasks = []
-        for page in range(1, pages + 1):
-            url = (
-                "https://news.ycombinator.com/"
-                if page == 1
-                else f"https://news.ycombinator.com/news?p={page}"
-            )
-            tasks.append(bounded_process_page(url, page))
+        # Creamos un grupo de tareas para poder gestionarlas
+        page_tasks = []
+        async with asyncio.TaskGroup() as task_group:
+            for page in range(1, pages + 1):
+                url = (
+                    "https://news.ycombinator.com/"
+                    if page == 1
+                    else f"https://news.ycombinator.com/news?p={page}"
+                )
+                page_tasks.append(task_group.create_task(bounded_process_page(url, page)))
 
-        # Execute all page processing tasks concurrently
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Procesamos los resultados a medida que se completan las tareas
+        for task in page_tasks:
+            page_result = task.result()
 
-        # Collect results, filtering out exceptions
-        for page_stories in results:
-            if isinstance(page_stories, list):
-                stories.extend(page_stories)
+            if isinstance(page_result, list):
+                for story in page_result:
+                    if fetched_count < limit:
+                        stories.append(story)
+                        fetched_count += 1
+                    else:
+                        break
+                if fetched_count >= limit:
+                    self.logger.info(f"Limit of {limit} stories reached. Stopping collection.")
+                    break
             else:
-                self.logger.error(f"Error processing page: {page_stories}")
+                self.logger.error(f"Error processing page: {page_result}")
 
-        self.logger.info(f"Successfully fetched {len(stories)} stories total")
-        return stories
+        self.logger.info(f"Successfully fetched {len(stories)} stories total (up to limit of {limit})")
+        return stories[:limit]
 
     async def _process_page(
         self, url: str, page_num: int

@@ -1,572 +1,572 @@
 [
-  {
-    "createdAt": "2025-04-20T21:28:55.762Z",
-    "updatedAt": "2025-04-21T02:58:09.000Z",
-    "id": "Y0kyqHk3gar46LaE",
-    "name": "Speech Recognition",
-    "active": true,
-    "nodes": [
-      {
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "transcribe",
-          "responseMode": "lastNode",
-          "options": {}
-        },
-        "id": "7c94e85b-2f35-4721-b379-331c09e7babc",
-        "name": "Webhook",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 1,
-        "position": [
-          -160,
-          100
-        ],
-        "webhookId": "c5d5af84-c750-4803-8ad8-d80263d5a155"
-      },
-      {
-        "parameters": {
-          "method": "POST",
-          "url": "https://api.assemblyai.com/v2/upload",
-          "authentication": "genericCredentialType",
-          "genericAuthType": "httpHeaderAuth",
-          "sendBody": true,
-          "contentType": "binaryData",
-          "inputDataFieldName": "=audio",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          60,
-          -20
-        ],
-        "id": "6f2c3f44-45ee-42f1-87d3-e7b9f457f49c",
-        "name": "Upload File",
-        "credentials": {
-          "httpHeaderAuth": {
-            "id": "DzbuzFqikmrekJ3m",
-            "name": "Assembly AI"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "method": "POST",
-          "url": "https://api.assemblyai.com/v2/transcript",
-          "authentication": "genericCredentialType",
-          "genericAuthType": "httpHeaderAuth",
-          "sendBody": true,
-          "bodyParameters": {
-            "parameters": [
-              {
-                "name": "audio_url",
-                "value": "={{ $json.upload_url }}"
-              },
-              {
-                "name": "language_detection",
-                "value": "={{ true }}"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          260,
-          -100
-        ],
-        "id": "440f0e83-3bde-42d8-bf40-c80e648426e5",
-        "name": "Transcribe",
-        "credentials": {
-          "httpHeaderAuth": {
-            "id": "DzbuzFqikmrekJ3m",
-            "name": "Assembly AI"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
-          "authentication": "genericCredentialType",
-          "genericAuthType": "httpHeaderAuth",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          480,
-          -20
-        ],
-        "id": "f34ff748-0d49-48ec-ae6b-65d725f956b7",
-        "name": "Pooling",
-        "credentials": {
-          "httpHeaderAuth": {
-            "id": "DzbuzFqikmrekJ3m",
-            "name": "Assembly AI"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "amount": 1
-        },
-        "type": "n8n-nodes-base.wait",
-        "typeVersion": 1.1,
-        "position": [
-          680,
-          200
-        ],
-        "id": "4f593f2f-6bbc-459a-b91f-712704d290ed",
-        "name": "Wait",
-        "webhookId": "90abb2f1-2026-4271-a6be-259d9ff53ca6"
-      },
-      {
-        "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "strict",
-              "version": 2
+    {
+        "createdAt": "2025-04-20T21:28:55.762Z",
+        "updatedAt": "2025-04-21T17:38:03.000Z",
+        "id": "Y0kyqHk3gar46LaE",
+        "name": "Speech Recognition",
+        "active": true,
+        "nodes": [
+            {
+                "parameters": {
+                    "httpMethod": "POST",
+                    "path": "transcribe",
+                    "responseMode": "lastNode",
+                    "options": {}
+                },
+                "id": "7c94e85b-2f35-4721-b379-331c09e7babc",
+                "name": "Webhook",
+                "type": "n8n-nodes-base.webhook",
+                "typeVersion": 1,
+                "position": [
+                    -160,
+                    100
+                ],
+                "webhookId": "c5d5af84-c750-4803-8ad8-d80263d5a155"
             },
-            "conditions": [
-              {
-                "id": "e0bbd5fe-5e43-4686-b8d6-d3e6df96412b",
-                "leftValue": "={{ $json.status }}",
-                "rightValue": "completed",
-                "operator": {
-                  "type": "string",
-                  "operation": "equals",
-                  "name": "filter.operator.equals"
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://api.assemblyai.com/v2/upload",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendBody": true,
+                    "contentType": "binaryData",
+                    "inputDataFieldName": "=audio",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    60,
+                    -20
+                ],
+                "id": "6f2c3f44-45ee-42f1-87d3-e7b9f457f49c",
+                "name": "Upload File",
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "DzbuzFqikmrekJ3m",
+                        "name": "Assembly AI"
+                    }
                 }
-              }
-            ],
-            "combinator": "or"
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.2,
-        "position": [
-          680,
-          -20
-        ],
-        "id": "8886a71c-5100-4a1b-a500-54a9691892d4",
-        "name": "Completed?"
-      },
-      {
-        "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "strict",
-              "version": 2
             },
-            "conditions": [
-              {
-                "id": "f7371dbc-54e3-49a3-8b62-b0892f906e16",
-                "leftValue": "={{ $json.status }}",
-                "rightValue": "error",
-                "operator": {
-                  "type": "string",
-                  "operation": "equals",
-                  "name": "filter.operator.equals"
+            {
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://api.assemblyai.com/v2/transcript",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendBody": true,
+                    "bodyParameters": {
+                        "parameters": [
+                            {
+                                "name": "audio_url",
+                                "value": "={{ $json.upload_url }}"
+                            },
+                            {
+                                "name": "language_detection",
+                                "value": "={{ true }}"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    260,
+                    -100
+                ],
+                "id": "440f0e83-3bde-42d8-bf40-c80e648426e5",
+                "name": "Transcribe",
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "DzbuzFqikmrekJ3m",
+                        "name": "Assembly AI"
+                    }
                 }
-              }
-            ],
-            "combinator": "and"
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.2,
-        "position": [
-          980,
-          260
+            },
+            {
+                "parameters": {
+                    "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    480,
+                    -20
+                ],
+                "id": "f34ff748-0d49-48ec-ae6b-65d725f956b7",
+                "name": "Pooling",
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "DzbuzFqikmrekJ3m",
+                        "name": "Assembly AI"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "amount": 1
+                },
+                "type": "n8n-nodes-base.wait",
+                "typeVersion": 1.1,
+                "position": [
+                    680,
+                    200
+                ],
+                "id": "4f593f2f-6bbc-459a-b91f-712704d290ed",
+                "name": "Wait",
+                "webhookId": "90abb2f1-2026-4271-a6be-259d9ff53ca6"
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 2
+                        },
+                        "conditions": [
+                            {
+                                "id": "e0bbd5fe-5e43-4686-b8d6-d3e6df96412b",
+                                "leftValue": "={{ $json.status }}",
+                                "rightValue": "completed",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "equals",
+                                    "name": "filter.operator.equals"
+                                }
+                            }
+                        ],
+                        "combinator": "or"
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.2,
+                "position": [
+                    680,
+                    -20
+                ],
+                "id": "8886a71c-5100-4a1b-a500-54a9691892d4",
+                "name": "Completed?"
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 2
+                        },
+                        "conditions": [
+                            {
+                                "id": "f7371dbc-54e3-49a3-8b62-b0892f906e16",
+                                "leftValue": "={{ $json.status }}",
+                                "rightValue": "error",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "equals",
+                                    "name": "filter.operator.equals"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.2,
+                "position": [
+                    980,
+                    260
+                ],
+                "id": "44d4273a-6415-4b0b-b05c-ffb2d441aa05",
+                "name": "Error?"
+            },
+            {
+                "parameters": {
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.respondToWebhook",
+                "typeVersion": 1.1,
+                "position": [
+                    1140,
+                    80
+                ],
+                "id": "8249008f-709c-4a2c-bfca-f3cd4a7f0254",
+                "name": "Respond to Webhook"
+            }
         ],
-        "id": "44d4273a-6415-4b0b-b05c-ffb2d441aa05",
-        "name": "Error?"
-      },
-      {
-        "parameters": {
-          "options": {}
+        "connections": {
+            "Webhook": {
+                "main": [
+                    [
+                        {
+                            "node": "Upload File",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Upload File": {
+                "main": [
+                    [
+                        {
+                            "node": "Transcribe",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Transcribe": {
+                "main": [
+                    [
+                        {
+                            "node": "Pooling",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Pooling": {
+                "main": [
+                    [
+                        {
+                            "node": "Completed?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Wait": {
+                "main": [
+                    [
+                        {
+                            "node": "Pooling",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Completed?": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Error?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Error?": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Wait",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
         },
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1.1,
-        "position": [
-          1140,
-          80
-        ],
-        "id": "8249008f-709c-4a2c-bfca-f3cd4a7f0254",
-        "name": "Respond to Webhook"
-      }
-    ],
-    "connections": {
-      "Webhook": {
-        "main": [
-          [
-            {
-              "node": "Upload File",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Upload File": {
-        "main": [
-          [
-            {
-              "node": "Transcribe",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Transcribe": {
-        "main": [
-          [
-            {
-              "node": "Pooling",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Pooling": {
-        "main": [
-          [
-            {
-              "node": "Completed?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Wait": {
-        "main": [
-          [
-            {
-              "node": "Pooling",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Completed?": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Error?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Error?": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Wait",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      }
+        "settings": {
+            "executionOrder": "v1"
+        },
+        "staticData": null,
+        "meta": {
+            "templateCredsSetupCompleted": true
+        },
+        "pinData": {},
+        "versionId": "363536fa-7aa5-4ba4-a0e1-5c2e8c8c8eb3",
+        "triggerCount": 1,
+        "tags": []
     },
-    "settings": {
-      "executionOrder": "v1"
-    },
-    "staticData": null,
-    "meta": {
-      "templateCredsSetupCompleted": true
-    },
-    "pinData": {},
-    "versionId": "363536fa-7aa5-4ba4-a0e1-5c2e8c8c8eb3",
-    "triggerCount": 1,
-    "tags": []
-  },
-  {
-    "createdAt": "2025-04-21T00:46:23.949Z",
-    "updatedAt": "2025-04-21T02:17:11.000Z",
-    "id": "VV8VW3wNzoXBoF1L",
-    "name": "Print AI Agent Workflow",
-    "active": true,
-    "nodes": [
-      {
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "ask",
-          "responseMode": "lastNode",
-          "options": {}
-        },
-        "id": "3fce216e-d639-4ebb-8e97-f678f553f9bb",
-        "name": "Webhook",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 1,
-        "position": [
-          -40,
-          0
-        ],
-        "webhookId": "c5d5af84-c750-4803-8ad8-d80263d5a155"
-      },
-      {
-        "parameters": {
-          "options": {}
-        },
-        "id": "9d286503-b773-4852-b113-bae72c966bd6",
-        "name": "Respond to Webhook",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1,
-        "position": [
-          740,
-          0
-        ]
-      },
-      {
-        "parameters": {
-          "promptType": "define",
-          "text": "={{ $json.body.query }}",
-          "options": {
-            "systemMessage": "## Rol\nEres un asistente virtual muy útil tu tarea será ofrecerle información al usuario acerca de libros, noticias y tendencias.\n\n## Instrucciones\nTu tarea será analizar la consulta del usuario y trazar un plan haciendo uso de las herramientas a tu alcance para ofrecerle la mejor respuesta.\n\n## Herramientas\n- Books: Obtiene todos los libros. Acepta como parámetro la categoría en caso de que se necesite filtrar por la misma.\n- Trend headlines: Obtiene todas las noticias y tendencias en tiempo real de Hacker News.\n- Search books: Busca entre los libros por categoría o título. Debe ser especificado uno de los títulos.\n\n## Respuesta\nTu respuesta debe ser profesional y asegurarte de que cubra en totalidad todas las partes de la pregunta del usaurio. Si el usuario pregunta por libros, ofrece toda la información de los mismos haciendo uso del siguiente formato XML:\n<book>\n   <title>Título del libro</title>\n   <price>$12.35</price>\n   <image>www.imageurl.com</image>\n</book>\nEn caso de que proporciones de noticias o tendencias:\n<new>\n   <title>Título de la noticia</title>\n   <url>www.url-de-la-noticia.com</url>\n   <score>98.1</score>\n</new>\n\n## Ejemplos\nEl usuario pregunta: \"Dime qué libros de ficción hay por debajo de 10 euros.\"\n1) Obtener todos los libros filtrando por la categoría de ficción.\n2) Analizar la información y encontrar aquellos libros que no pasen del umbral de precio.\n3) Ofrecer una respuesta completa y profesional al usuario.\n\nEl usuario pregunta: \"Proporcióname un libro por debajo de 15 euros.\"\n1) Obtienes la información de todos los libros.\n2) Analizas toda la información para ver cuáles libros cumplen con el requisito del usuario.\n3) Proporcionas una respuesta completa y coherente al usuario.\n\nEl usuario pregunta: \"Dime las últimas noticias acerca de OpenAI.\"\n1) Obtienes todas las noticias en tiempo real.\n2) Analizas la información para saber cuáles pueden ser de OpenAI.\n3) Ofreces una respuesta completa y coherente al usuario."
-          }
-        },
-        "type": "@n8n/n8n-nodes-langchain.agent",
-        "typeVersion": 1.8,
-        "position": [
-          280,
-          0
-        ],
-        "id": "33da0854-ecf7-4dfe-a7a6-cca533072f69",
-        "name": "AI Agent1",
-        "alwaysOutputData": false
-      },
-      {
-        "parameters": {
-          "modelName": "models/gemini-2.0-flash",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-        "typeVersion": 1,
-        "position": [
-          200,
-          220
-        ],
-        "id": "09c836d9-572a-48f0-a484-14950d555e6e",
-        "name": "Google Gemini Chat Model",
-        "credentials": {
-          "googlePalmApi": {
-            "id": "qdQpnO12rEaXDRWX",
-            "name": "Google Gemini(PaLM) Api account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "toolDescription": "Obtiene la información de todos los libros guardados en la base de datos. Se puede filtrar por categoría si es necesario.",
-          "url": "http://backend:7013/api/v1/books",
-          "sendQuery": true,
-          "parametersQuery": {
-            "values": [
-              {
-                "name": "category",
-                "valueProvider": "modelOptional"
-              }
-            ]
-          }
-        },
-        "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
-        "typeVersion": 1.1,
-        "position": [
-          520,
-          340
-        ],
-        "id": "b5fd944d-cd65-4082-a976-3814c7df2ec5",
-        "name": "Books"
-      },
-      {
-        "parameters": {
-          "toolDescription": "Obtiene todas las noticias y tendencias actuales en tiempo real desde Hacker News.",
-          "url": "http://backend:7013/api/v1/headlines",
-          "sendQuery": true,
-          "parametersQuery": {
-            "values": [
-              {
-                "name": "limit",
-                "valueProvider": "modelOptional"
-              }
-            ]
-          }
-        },
-        "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
-        "typeVersion": 1.1,
-        "position": [
-          440,
-          220
-        ],
-        "id": "8cad2366-865f-403c-af10-9b706b669545",
-        "name": "Trending Headlines"
-      },
-      {
-        "parameters": {
-          "sessionIdType": "customKey",
-          "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
-        },
-        "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-        "typeVersion": 1.3,
-        "position": [
-          320,
-          220
-        ],
-        "id": "50023e58-0f0e-47d6-8cff-fcd8569e48c3",
-        "name": "Simple Memory",
-        "disabled": true
-      },
-      {
-        "parameters": {
-          "toolDescription": "Busca libros guardados en la base de datos filtrando por título o categoría. Uno de los dos parámetros debe ser proveído de manera obligatoria.",
-          "url": "http://backend:7013/api/v1/books/search",
-          "sendQuery": true,
-          "parametersQuery": {
-            "values": [
-              {
-                "name": "title",
-                "valueProvider": "modelOptional"
-              },
-              {
-                "name": "category",
-                "valueProvider": "modelOptional"
-              }
-            ]
-          }
-        },
-        "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
-        "typeVersion": 1.1,
-        "position": [
-          580,
-          220
-        ],
-        "id": "878cd082-4faa-4fe8-adea-4b0830a1608b",
-        "name": "Search books"
-      }
-    ],
-    "connections": {
-      "Webhook": {
-        "main": [
-          [
+    {
+        "createdAt": "2025-04-21T00:46:23.949Z",
+        "updatedAt": "2025-04-21T17:55:31.000Z",
+        "id": "VV8VW3wNzoXBoF1L",
+        "name": "Print AI Agent Workflow",
+        "active": true,
+        "nodes": [
             {
-              "node": "AI Agent1",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "AI Agent1": {
-        "main": [
-          [
+                "parameters": {
+                    "httpMethod": "POST",
+                    "path": "ask",
+                    "responseMode": "lastNode",
+                    "options": {}
+                },
+                "id": "3fce216e-d639-4ebb-8e97-f678f553f9bb",
+                "name": "Webhook",
+                "type": "n8n-nodes-base.webhook",
+                "typeVersion": 1,
+                "position": [
+                    -40,
+                    0
+                ],
+                "webhookId": "c5d5af84-c750-4803-8ad8-d80263d5a155"
+            },
             {
-              "node": "Respond to Webhook",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Google Gemini Chat Model": {
-        "ai_languageModel": [
-          [
+                "parameters": {
+                    "options": {}
+                },
+                "id": "9d286503-b773-4852-b113-bae72c966bd6",
+                "name": "Respond to Webhook",
+                "type": "n8n-nodes-base.respondToWebhook",
+                "typeVersion": 1,
+                "position": [
+                    740,
+                    0
+                ]
+            },
             {
-              "node": "AI Agent1",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Books": {
-        "ai_tool": [
-          [
+                "parameters": {
+                    "promptType": "define",
+                    "text": "={{ $json.body.query }}",
+                    "options": {
+                        "systemMessage": "## Rol\nEres un asistente virtual muy útil, experto en el análisis y filtrado de información acerca de libros y tendencias o noticias.\n\n## Herramientas\n- Books: Obtiene todos los libros. Acepta como parámetro la categoría en caso de que se necesite filtrar por la misma.\n- Trend headlines: Obtiene todas las noticias y tendencias en tiempo real de Hacker News.\n- Search books: Busca entre los libros por categoría o título. Debe ser especificado uno de los títulos.\n*Las categorías deben ser especificadas como: fiction, non-fiction, romance, science, academic, fantasy, poetry, horror, science-fiction, etc.\n\n## Instrucciones\nTu tarea será analizar la consulta del usuario y trazar un plan haciendo uso de las herramientas a tu alcance para ofrecerle una respuesta precisa, coherente y completa basándote únicamente en los resultados obtenidos.\nEn caso de que no se pueda cumplir la consulta del usuario con las herramientas actuales o es imposible exprésalo.\n\n## Respuesta\nTu respuesta debe ser profesional y asegurarte de que cubra en totalidad todas las partes de la pregunta del usaurio, así como debes mantener un tono cálido y amigable.\n\n## Formato de referencia\nPara hacer referencia a un libro o a una noticia o tendencia hazlo utilizando un formato XML.\n**Para libros**:\n```xml\n<book>\n   <title>Título del libro</title>\n   <price>$12.35</price>\n   <category>Categoría del libro</category>\n   <image>www.imageurl.com</image>\n</book>\n```\n**Para noticias o tendencias**\n```xml\n<headline>\n   <title>Título de la noticia</title>\n   <url>www.url-de-la-noticia.com</url>\n   <score>98.1</score>\n</headline>\n```\nEn caso de que vayas a proporcionar una lista de libros utiliza las etiquetas `<books></books>` y para una lista de noticias o tendencias: `<headlines></headlines>`.\nEs obligado envolver las referencias en un bloque de código XML.\n\n## Ejemplos\nEl usuario pregunta: \"Dime qué libros de ficción hay por debajo de 10 euros.\"\n1) Obtener todos los libros filtrando por la categoría de ficción.\n2) Analizar la información y encontrar aquellos libros que no pasen del umbral de precio.\n3) Ofrecer una respuesta completa y profesional al usuario.\n\nEl usuario pregunta: \"Proporcióname un libro por debajo de 15 euros.\"\n1) Obtienes la información de todos los libros.\n2) Analizas toda la información para ver cuáles libros cumplen con el requisito del usuario.\n3) Proporcionas una respuesta completa y coherente al usuario.\n\nEl usuario pregunta: \"Dime las últimas noticias acerca de OpenAI.\"\n1) Obtienes todas las noticias en tiempo real.\n2) Analizas la información para saber cuáles pueden ser de OpenAI.\n3) Ofreces una respuesta completa y coherente al usuario."
+                    }
+                },
+                "type": "@n8n/n8n-nodes-langchain.agent",
+                "typeVersion": 1.8,
+                "position": [
+                    280,
+                    0
+                ],
+                "id": "33da0854-ecf7-4dfe-a7a6-cca533072f69",
+                "name": "AI Agent1",
+                "alwaysOutputData": false
+            },
             {
-              "node": "AI Agent1",
-              "type": "ai_tool",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Trending Headlines": {
-        "ai_tool": [
-          [
+                "parameters": {
+                    "modelName": "models/gemini-2.0-flash",
+                    "options": {}
+                },
+                "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+                "typeVersion": 1,
+                "position": [
+                    200,
+                    220
+                ],
+                "id": "09c836d9-572a-48f0-a484-14950d555e6e",
+                "name": "Google Gemini Chat Model",
+                "credentials": {
+                    "googlePalmApi": {
+                        "id": "qdQpnO12rEaXDRWX",
+                        "name": "Google Gemini(PaLM) Api account"
+                    }
+                }
+            },
             {
-              "node": "AI Agent1",
-              "type": "ai_tool",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Simple Memory": {
-        "ai_memory": [
-          [
+                "parameters": {
+                    "toolDescription": "Obtiene la información de todos los libros guardados en la base de datos. Se puede filtrar por categoría si es necesario.",
+                    "url": "http://backend:7013/api/v1/books",
+                    "sendQuery": true,
+                    "parametersQuery": {
+                        "values": [
+                            {
+                                "name": "category",
+                                "valueProvider": "modelOptional"
+                            }
+                        ]
+                    }
+                },
+                "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+                "typeVersion": 1.1,
+                "position": [
+                    520,
+                    340
+                ],
+                "id": "b5fd944d-cd65-4082-a976-3814c7df2ec5",
+                "name": "Books"
+            },
             {
-              "node": "AI Agent1",
-              "type": "ai_memory",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Search books": {
-        "ai_tool": [
-          [
+                "parameters": {
+                    "toolDescription": "Obtiene todas las noticias y tendencias actuales en tiempo real desde Hacker News.",
+                    "url": "http://backend:7013/api/v1/headlines",
+                    "sendQuery": true,
+                    "parametersQuery": {
+                        "values": [
+                            {
+                                "name": "limit",
+                                "valueProvider": "modelOptional"
+                            }
+                        ]
+                    }
+                },
+                "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+                "typeVersion": 1.1,
+                "position": [
+                    440,
+                    220
+                ],
+                "id": "8cad2366-865f-403c-af10-9b706b669545",
+                "name": "Trending Headlines"
+            },
             {
-              "node": "AI Agent1",
-              "type": "ai_tool",
-              "index": 0
+                "parameters": {
+                    "sessionIdType": "customKey",
+                    "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+                },
+                "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+                "typeVersion": 1.3,
+                "position": [
+                    320,
+                    220
+                ],
+                "id": "50023e58-0f0e-47d6-8cff-fcd8569e48c3",
+                "name": "Simple Memory",
+                "disabled": true
+            },
+            {
+                "parameters": {
+                    "toolDescription": "Busca libros guardados en la base de datos filtrando por título o categoría. Uno de los dos parámetros debe ser proveído de manera obligatoria.",
+                    "url": "http://backend:7013/api/v1/books/search",
+                    "sendQuery": true,
+                    "parametersQuery": {
+                        "values": [
+                            {
+                                "name": "title",
+                                "valueProvider": "modelOptional"
+                            },
+                            {
+                                "name": "category",
+                                "valueProvider": "modelOptional"
+                            }
+                        ]
+                    }
+                },
+                "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+                "typeVersion": 1.1,
+                "position": [
+                    580,
+                    220
+                ],
+                "id": "878cd082-4faa-4fe8-adea-4b0830a1608b",
+                "name": "Search books"
             }
-          ]
-        ]
-      },
-      "Respond to Webhook": {
-        "main": [
-          []
-        ]
-      }
-    },
-    "settings": {
-      "executionOrder": "v1"
-    },
-    "staticData": null,
-    "meta": {
-      "templateCredsSetupCompleted": true,
-      "instanceId": "d429b1253486fb9ad89953f206f7b1971109e4e8f1692d79e0bb43187175608f"
-    },
-    "pinData": {},
-    "versionId": "99944b99-02e7-44d5-913b-3b6adc08f827",
-    "triggerCount": 1,
-    "tags": []
-  }
+        ],
+        "connections": {
+            "Webhook": {
+                "main": [
+                    [
+                        {
+                            "node": "AI Agent1",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "AI Agent1": {
+                "main": [
+                    [
+                        {
+                            "node": "Respond to Webhook",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Google Gemini Chat Model": {
+                "ai_languageModel": [
+                    [
+                        {
+                            "node": "AI Agent1",
+                            "type": "ai_languageModel",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Books": {
+                "ai_tool": [
+                    [
+                        {
+                            "node": "AI Agent1",
+                            "type": "ai_tool",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Trending Headlines": {
+                "ai_tool": [
+                    [
+                        {
+                            "node": "AI Agent1",
+                            "type": "ai_tool",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Simple Memory": {
+                "ai_memory": [
+                    [
+                        {
+                            "node": "AI Agent1",
+                            "type": "ai_memory",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Search books": {
+                "ai_tool": [
+                    [
+                        {
+                            "node": "AI Agent1",
+                            "type": "ai_tool",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Respond to Webhook": {
+                "main": [
+                    []
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1"
+        },
+        "staticData": null,
+        "meta": {
+            "templateCredsSetupCompleted": true,
+            "instanceId": "d429b1253486fb9ad89953f206f7b1971109e4e8f1692d79e0bb43187175608f"
+        },
+        "pinData": {},
+        "versionId": "b43cdd1e-a785-4283-98cb-e05968e69499",
+        "triggerCount": 1,
+        "tags": []
+    }
 ]

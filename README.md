@@ -4,6 +4,24 @@
 
 ### Environment vars
 
+- General:
+  
+```env
+REDIS_HOST = redis
+REDIS_PORT = 6379
+
+N8N_BASIC_AUTH_ACTIVE = true
+N8N_BASIC_AUTH_USER = admin
+N8N_BASIC_AUTH_PASSWORD = admin
+N8N_HOST = n8n
+N8N_HOST_EXTERNAL = localhost
+N8N_PORT_EXTERNAL = 5678
+N8N_PORT = 5678
+N8N_SECURE_COOKIE = false
+
+REMOTE_DRIVER_URL=http://selenium:4444/wd/hub
+```
+
 - Backend:
 
 ```env
@@ -14,7 +32,7 @@ REDIS_PORT = 6379
 - Frontend
 
 ```env
-VITE_REACT_N8N_URL=http://route-to-n8n-webhook/ask
+VITE_REACT_N8N_URL=http://route-to-n8n-webhook
 ```
 
 ### Start the project

@@ -70,7 +70,7 @@ async def search_books(
     """
     if not title and not category:
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Debe proporcionar al menos un parámetro de búsqueda (título o categoría)",
         )
 
