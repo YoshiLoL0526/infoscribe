@@ -19,7 +19,7 @@ class Settings:
     BOOK_SCRAPER_URL: str = os.getenv("BOOK_SCRAPER_URL", "http://books.toscrape.com")
 
     MAX_BOOKS_TO_SCRAPE: int = int(os.getenv("MAX_BOOKS_TO_SCRAPE", 100))
-    PRICE_LIMIT: float = float(os.getenv("PRICE_LIMIT", 50.0))
+    PRICE_LIMIT: float = float(os.getenv("PRICE_LIMIT", 20.0))
 
 
 settings = Settings()

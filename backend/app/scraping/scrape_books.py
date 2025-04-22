@@ -13,12 +13,9 @@ import os
 from typing import List, Dict, Optional
 import re
 from urllib.parse import urljoin
-from dotenv import load_dotenv
 
 from app.services.redis_service import RedisService
 from app.models.schemas import Book
-
-load_dotenv()
 
 
 class BookScraper:
