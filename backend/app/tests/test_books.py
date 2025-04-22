@@ -1,172 +1,100 @@
 import pytest
 from unittest.mock import patch
 
-
-# Test para el endpoint /api/v1/init
-# @pytest.mark.anyio
-async def test_init_books(async_client):
-    # Simular la respuesta esperada
-    mock_books = [
-        {
-            "id": "1",
-            "title": "Python Testing",
-            "price": 29.99,
-            "category": "Programming",
-            "description": "Learn Python testing",
-            "image_url": "http://example.com/image1.jpg"
-        }
-    ]
-    
-    # Mockear la función que inicializa la base de datos
-    with patch("app.endpoints.books.init_books", return_value=mock_books):
-        response = await async_client.post("/api/v1/init")
-        
-        assert response.status_code == 200
-        # assert response.json() == mock_books
+pytest_plugins = ('pytest_asyncio',)
 
 
 # Test para el endpoint /api/v1/books sin filtro de categoría
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_get_all_books(async_client):
-    # Simular la respuesta esperada
-    mock_books = [
-        {
-            "id": "1",
-            "title": "Python Testing",
-            "price": 29.99,
-            "category": "Programming",
-            "description": "Learn Python testing",
-            "image_url": "http://example.com/image1.jpg"
-        },
-        {
-            "id": "2",
-            "title": "FastAPI Guide",
-            "price": 19.99,
-            "category": "Web Development",
-            "description": "Guide to FastAPI",
-            "image_url": "http://example.com/image2.jpg"
-        }
-    ]
-    
     # Mockear la función que obtiene todos los libros
-    with patch("app.endpoints.books.get_books", return_value=mock_books):
+    with patch("app.endpoints.books.get_books"):
         response = await async_client.get("/api/v1/books")
         
         assert response.status_code == 200
-        # assert response.json() == mock_books
+        assert isinstance(response.json()["books"], list)
+        if len(response.json()["books"]) > 0:
+            assert "id" in response.json()["books"][0]
+            assert "title" in response.json()["books"][0]
+            assert "price" in response.json()["books"][0]
+            assert "category" in response.json()["books"][0]
 
 
 # Test para el endpoint /api/v1/books con filtro de categoría
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_get_books_by_category(async_client):
-    # Simular la respuesta esperada
-    mock_books = [
-        {
-            "id": "1",
-            "title": "Python Testing",
-            "price": 29.99,
-            "category": "Programming",
-            "description": "Learn Python testing",
-            "image_url": "http://example.com/image1.jpg"
-        }
-    ]
-    
-    # Mockear la función que obtiene libros filtrados por categoría
-    with patch("app.endpoints.books.get_books", return_value=mock_books):
-        response = await async_client.get("/api/v1/books?category=Programming")
+    with patch("app.endpoints.books.get_books"):
+        response = await async_client.get("/api/v1/books?category=Science")
         
         assert response.status_code == 200
-        # assert response.json() == mock_books
-        # assert len(response.json()) == 1
-        # assert response.json()[0]["category"] == "Programming"
+        assert isinstance(response.json()["books"], list)
+        if len(response.json()["books"]) > 0:
+            assert "id" in response.json()["books"][0]
+            assert "title" in response.json()["books"][0]
+            assert "price" in response.json()["books"][0]
+            assert "category" in response.json()["books"][0]
+            assert response.json()["books"][0]["category"] == "Science"
 
 
 # Test para el endpoint /api/v1/books/search con filtro por título
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_search_books_by_title(async_client):
-    # Simular la respuesta esperada
-    mock_books = [
-        {
-            "id": "1",
-            "title": "Python Testing",
-            "price": 29.99,
-            "category": "Programming",
-            "description": "Learn Python testing",
-            "image_url": "http://example.com/image1.jpg"
-        }
-    ]
-    
-    # Mockear la función de búsqueda
-    with patch("app.endpoints.books.search_books", return_value=mock_books):
-        response = await async_client.get("/api/v1/books/search?title=Python")
+    with patch("app.endpoints.books.search_books"):
+        response = await async_client.get("/api/v1/books/search?title=Railway")
         
         assert response.status_code == 200
-        # assert response.json() == mock_books
-        # assert "Python" in response.json()[0]["title"]
+        assert isinstance(response.json()["books"], list)
+        if len(response.json()["books"]) > 0:
+            assert "id" in response.json()["books"][0]
+            assert "title" in response.json()["books"][0]
+            assert "price" in response.json()["books"][0]
+            assert "category" in response.json()["books"][0]
+            assert "Railway".lower() in response.json()["books"][0]["title"].lower()
 
 
 # Test para el endpoint /api/v1/books/search con filtro por categoría
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_search_books_by_category(async_client):
-    # Simular la respuesta esperada
-    mock_books = [
-        {
-            "id": "1",
-            "title": "Python Testing",
-            "price": 29.99,
-            "category": "Programming",
-            "description": "Learn Python testing",
-            "image_url": "http://example.com/image1.jpg"
-        }
-    ]
-    
-    # Mockear la función de búsqueda
-    with patch("app.endpoints.books.search_books", return_value=mock_books):
-        response = await async_client.get("/api/v1/books/search?category=Programming")
+    with patch("app.endpoints.books.search_books"):
+        response = await async_client.get("/api/v1/books/search?category=Science")
         
         assert response.status_code == 200
-        # assert response.json() == mock_books
-        # assert response.json()[0]["category"] == "Programming"
+        assert isinstance(response.json()["books"], list)
+        if len(response.json()["books"]) > 0:
+            assert "id" in response.json()["books"][0]
+            assert "title" in response.json()["books"][0]
+            assert "price" in response.json()["books"][0]
+            assert "category" in response.json()["books"][0]
+            assert response.json()["books"][0]["category"] == "Science"
 
 
 # Test para el endpoint /api/v1/books/search con filtro por título y categoría
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_search_books_by_title_and_category(async_client):
-    # Simular la respuesta esperada
-    mock_books = [
-        {
-            "id": "1",
-            "title": "Python Testing",
-            "price": 29.99,
-            "category": "Programming",
-            "description": "Learn Python testing",
-            "image_url": "http://example.com/image1.jpg"
-        }
-    ]
-    
-    # Mockear la función de búsqueda
-    with patch("app.endpoints.books.search_books", return_value=mock_books):
-        response = await async_client.get("/api/v1/books/search?title=Python&category=Programming")
+    with patch("app.endpoints.books.search_books"):
+        response = await async_client.get("/api/v1/books/search?title=Moving&category=Romance")
         
         assert response.status_code == 200
-        # assert response.json() == mock_books
-        # assert "Python" in response.json()[0]["title"]
-        # assert response.json()[0]["category"] == "Programming"
+        assert isinstance(response.json()["books"], list)
+        if len(response.json()["books"]) > 0:
+            assert "id" in response.json()["books"][0]
+            assert "title" in response.json()["books"][0]
+            assert "price" in response.json()["books"][0]
+            assert "category" in response.json()["books"][0]
+            assert "Moving".lower() in response.json()["books"][0]["title"].lower()
+            assert response.json()["books"][0]["category"] == "Romance"
 
 
 # Test para validar error 422 cuando se proporciona un parámetro inválido
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_search_books_validation_error(async_client):
-    # Enviar un parámetro que no es una cadena para title
     response = await async_client.get("/api/v1/books/search")
-    
-    # Debe devolver un error de validación ya que al menos un parámetro debe estar presente
+
     assert response.status_code == 422
-    # assert "validation error" in response.text.lower()
 
 
 # Test para validar que un libro tiene la estructura correcta
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_book_structure(async_client):
     # Simular la respuesta esperada
     mock_book = {
@@ -174,7 +102,6 @@ async def test_book_structure(async_client):
         "title": "Python Testing",
         "price": 29.99,
         "category": "Programming",
-        "description": "Learn Python testing",
         "image_url": "http://example.com/image1.jpg"
     }
     
@@ -183,15 +110,46 @@ async def test_book_structure(async_client):
         response = await async_client.get("/api/v1/books")
         
         assert response.status_code == 200
-        # book = response.json()[0]
+        if len(response.json()["books"]) > 0:
+            book = response.json()["books"][0]
+
+            assert "id" in book
+            assert "title" in book
+            assert "price" in book
+            assert "category" in book
+            assert isinstance(book["id"], str)
+            assert isinstance(book["title"], str)
+            assert isinstance(book["price"], (int, float))
+            assert isinstance(book["category"], str)
+            assert book["price"] > 0
+
+
+# Test para validar que un libro tiene la estructura correcta
+@pytest.mark.asyncio
+async def test_book_structure_search(async_client):
+    # Simular la respuesta esperada
+    mock_book = {
+        "id": "1",
+        "title": "Python Testing",
+        "price": 29.99,
+        "category": "Programming",
+        "image_url": "http://example.com/image1.jpg"
+    }
+    
+    # Mockear la función que obtiene libros
+    with patch("app.endpoints.books.search_books", return_value=[mock_book]):
+        response = await async_client.get("/api/v1/books/search?title=Python")
         
-        # Verificar la estructura y tipos de datos
-        # assert "id" in book
-        # assert "title" in book
-        # assert "price" in book
-        # assert "category" in book
-        # assert isinstance(book["id"], str)
-        # assert isinstance(book["title"], str)
-        # assert isinstance(book["price"], (int, float))
-        # assert isinstance(book["category"], str)
-        # assert book["price"] > 0  # price debe ser mayor que 0
+        assert response.status_code == 200
+        if len(response.json()["books"]) > 0:
+            book = response.json()["books"][0]
+
+            assert "id" in book
+            assert "title" in book
+            assert "price" in book
+            assert "category" in book
+            assert isinstance(book["id"], str)
+            assert isinstance(book["title"], str)
+            assert isinstance(book["price"], (int, float))
+            assert isinstance(book["category"], str)
+            assert book["price"] > 0

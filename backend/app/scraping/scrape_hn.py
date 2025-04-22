@@ -9,10 +9,10 @@ using Selenium for use with FastAPI services.
 """
 
 import os
+import re
 import logging
 import asyncio
 from typing import List, Dict, Optional, Union
-from urllib.parse import urlparse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -22,6 +22,8 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     WebDriverException,
 )
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -29,19 +31,23 @@ from tenacity import (
     retry_if_exception_type,
 )
 
+from app.core.config import settings
+from app.models.schemas import Headline
+
 
 class HackerNewsIntegration:
     """
     A class to integrate asynchronously with Hacker News and fetch top stories.
-    Uses Selenium for web automation.
+    Uses Selenium for web automation with automatic WebDriver configuration.
     """
 
-    def __init__(self, driver_url: str, logs_dir: str = "logs"):
+    def __init__(self, driver_url: Optional[str] = None, logs_dir: str = "logs"):
         """
         Initialize a new HackerNewsIntegration instance.
 
         Args:
-            driver_url: URL of the Selenium driver to use
+            driver_url: Optional URL of the Selenium driver to use.
+                        If None, will automatically set up a local driver.
             logs_dir: Directory for log files
         """
         # Configurar logger
@@ -59,18 +65,15 @@ class HackerNewsIntegration:
 
         # Store driver URL for creating new sessions
         self.driver_url = driver_url
-
-        # Verify the driver_url is properly formatted
-        if not self.driver_url:
-            self.logger.error("Driver URL is not specified")
-            raise ValueError("Driver URL must be specified")
+        self.use_local_driver = driver_url is None
+        self.logger.info(f"Using {'local' if self.use_local_driver else 'remote'} WebDriver")
 
         # Configuration for Selenium wait timeouts
         self.wait_timeout = 30  # seconds
 
     async def _create_driver(self):
         """
-        Create a new remote driver instance connected to the Selenium server.
+        Create a new driver instance, either local or remote.
         Returns a WebDriver instance or raises an exception if creation fails.
         """
         loop = asyncio.get_event_loop()
@@ -90,7 +93,7 @@ class HackerNewsIntegration:
 
     def _create_driver_sync(self):
         """
-        Synchronous method to create a driver instance.
+        Synchronous method to create a driver instance, either local or remote.
         Returns a WebDriver instance.
         """
         try:
@@ -106,9 +109,15 @@ class HackerNewsIntegration:
                 "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             )
 
-            # Connect to remote Selenium instance
-            self.logger.info(f"Connecting to Selenium server at {self.driver_url}")
-            driver = webdriver.Remote(command_executor=self.driver_url, options=options)
+            if self.use_local_driver:
+                # Automatically download and use local ChromeDriver
+                self.logger.info("Setting up local ChromeDriver")
+                service = Service(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service, options=options)
+            else:
+                # Connect to remote Selenium instance
+                self.logger.info(f"Connecting to Selenium server at {self.driver_url}")
+                driver = webdriver.Remote(command_executor=self.driver_url, options=options)
 
             # Test if driver is responsive
             driver.title  # This will raise an exception if the driver is not working
@@ -172,7 +181,7 @@ class HackerNewsIntegration:
                     pass
             raise
 
-    def _extract_story_data(self, story_row, subtext_row) -> Dict[str, Union[str, int]]:
+    def _extract_story_data(self, story_row, subtext_row) -> Headline:
         """
         Extract story data from Selenium elements.
 
@@ -191,31 +200,42 @@ class HackerNewsIntegration:
         title = title_link.text.strip()
         url = title_link.get_attribute("href")
 
-        # Get domain if available
-        try:
-            domain = urlparse(url).netloc
-        except:
-            domain = "unknown"
-
         # Get score
         score = 0
         try:
-            score_element = subtext_row.find_element(By.CSS_SELECTOR, ".score")
+            # Buscar por atributo que comienza con "score_" o la clase tradicional "score"
+            score_element = None
+            # Intenta encontrar el elemento con clase que comienza con "score_"
+            score_elements = subtext_row.find_elements(By.CSS_SELECTOR, "[class^='score_']")
+            if score_elements:
+                score_element = score_elements[0]
+            else:
+                # Intenta con la clase tradicional "score"
+                score_elements = subtext_row.find_elements(By.CSS_SELECTOR, ".score")
+                if score_elements:
+                    score_element = score_elements[0]
+                    
             if score_element:
                 score_text = score_element.text
-                score = int(score_text.split()[0])
-        except ValueError as e:
+                # Extraer solo los dígitos del texto de puntuación
+                score_digits = re.search(r'(\d+)', score_text)
+                if score_digits:
+                    score = int(score_digits.group(1))
+        except Exception as e:
             self.logger.debug(f"Story {story_id} has no score: {e}")
 
-        return {"title": title, "url": url, "score": score, "domain": domain}
+        return Headline(
+            title=title,
+            url=url,
+            score=score
+        )
 
-    async def fetch_top_stories(self, limit: int = 5, pages: int = 5) -> List[Dict[str, Union[str, int]]]:
+    async def fetch_top_stories(self, pages: int = 5) -> List[Dict[str, Union[str, int]]]:
         """
         Fetch top stories from Hacker News asynchronously, up to a specified limit.
         """
         stories = []
-        semaphore = asyncio.Semaphore(2)  # Limit to 2 concurrent browser sessions
-        fetched_count = 0
+        semaphore = asyncio.Semaphore(5)
 
         async def bounded_process_page(url, page):
             async with semaphore:
@@ -225,9 +245,9 @@ class HackerNewsIntegration:
         tasks = []
         for page in range(1, pages + 1):
             url = (
-                "https://news.ycombinator.com/"
+                settings.HACKER_NEWS_URL
                 if page == 1
-                else f"https://news.ycombinator.com/news?p={page}"
+                else f"{settings.HACKER_NEWS_URL}?p={page}"
             )
             tasks.append(bounded_process_page(url, page))
         
@@ -237,21 +257,13 @@ class HackerNewsIntegration:
         for page_result in page_results:
             if isinstance(page_result, list):
                 for story in page_result:
-                    if fetched_count < limit:
                         stories.append(story)
-                        fetched_count += 1
-                    else:
-                        break
-                if fetched_count >= limit:
-                    self.logger.info(f"Limit of {limit} stories reached. Stopping collection.")
-                    break
             elif isinstance(page_result, Exception):
                 self.logger.error(f"Error processing page: {page_result}")
             else:
                 self.logger.error(f"Error processing page: {page_result}")
 
-        self.logger.info(f"Successfully fetched {len(stories)} stories total (up to limit of {limit})")
-        return stories[:limit]
+        return stories
 
     async def _process_page(
         self, url: str, page_num: int
@@ -356,39 +368,16 @@ class HackerNewsIntegration:
 
         return stories
 
+    # Método específico para facilitar testing con FastAPI
+    async def __aenter__(self):
+        """
+        Async context manager entry point - for use with FastAPI testing.
+        """
+        return self
 
-async def main():
-    """Main function to demonstrate the SeleniumHackerNewsIntegration class."""
-    # Example driver URL - replace with actual Selenium Grid URL
-    selenium_driver_url = "http://localhost:4444/wd/hub"
-
-    try:
-        # Verify Selenium server is accessible before proceeding
-        print(f"Connecting to Selenium server at {selenium_driver_url}...")
-        hn = HackerNewsIntegration(driver_url=selenium_driver_url)
-
-        # Get all top stories
-        print("Fetching stories...")
-        all_stories = await hn.search_news()
-        print(f"Se encontraron {len(all_stories)} historias principales")
-
-        # Show top 5 stories
-        for i, story in enumerate(all_stories[:5]):
-            print(f"{i+1}. {story['title']} (Score: {story['score']})")
-            print(f"   URL: {story['url']}")
-            print(f"   Domain: {story['domain']}")
-            print("-" * 50)
-
-        # Example search by term
-        search_term = "openai"
-        filtered_stories = await hn.search_news(search_term)
-        print(f"\nBúsqueda por '{search_term}': {len(filtered_stories)} resultados")
-        for i, story in enumerate(filtered_stories[:3]):
-            print(f"{i+1}. {story['title']} (Score: {story['score']})")
-
-    except Exception as e:
-        print(f"Error crítico en la ejecución: {e}")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """
+        Async context manager exit point - for use with FastAPI testing.
+        """
+        # Cleaning up resources is already handled in the individual methods
+        pass

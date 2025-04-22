@@ -15,8 +15,11 @@ class Settings:
 
     REMOTE_DRIVER_URL = os.getenv("REMOTE_DRIVER_URL")
 
-    HACKER_NEWS_API_URL: str = "https://news.ycombinator.com/"
+    HACKER_NEWS_URL: str = "https://news.ycombinator.com/"
     BOOK_SCRAPER_URL: str = os.getenv("BOOK_SCRAPER_URL", "http://books.toscrape.com")
+
+    MAX_BOOKS_TO_SCRAPE: int = int(os.getenv("MAX_BOOKS_TO_SCRAPE", 100))
+    PRICE_LIMIT: float = float(os.getenv("PRICE_LIMIT", 50.0))
 
 
 settings = Settings()

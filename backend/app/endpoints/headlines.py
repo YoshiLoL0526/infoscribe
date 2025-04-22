@@ -12,11 +12,10 @@ router = APIRouter()
     summary="Obtiene titulares actuales de Hacker News",
 )
 async def get_headlines(
-    service: HackerNewsIntegration = Depends(get_headlines_service), limit: int = 30
+    service: HackerNewsIntegration = Depends(get_headlines_service)
 ):
     """
     Endpoint en tiempo real que obtiene los titulares actuales de Hacker News.
-    Nunca devuelve datos en caché.
     """
-    headlines = await service.fetch_top_stories(limit)
+    headlines = await service.fetch_top_stories()
     return HeadlineList(headlines=headlines)

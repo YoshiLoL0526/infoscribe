@@ -26,8 +26,6 @@ services:
    command: poetry run uvicorn app.main:app --host 0.0.0.0 --port 7013
    ports:
      - "18000:7013"
-   volumes:
-     - ./backend:/backend
    depends_on:
      - selenium
      - redis
@@ -36,11 +34,11 @@ services:
      - REDIS_PORT=${REDIS_PORT:-6379}
      - REMOTE_DRIVER_URL=${REMOTE_DRIVER_URL:-http://selenium:4444/wd/hub}
    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7013/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
+    test: ["CMD", "curl", "-f", "http://localhost:7013/health"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 15s
 
  tests:
    build:
@@ -49,10 +47,8 @@ services:
    command: >
      sh -c "
        cd /backend &&
-       poetry run pytest -v --maxfail=1 --disable-warnings --tb=short
+       poetry run pytest -v --disable-warnings --tb=short
      "
-   volumes:
-     - ./backend:/backend
    depends_on:
     backend:
       condition: service_healthy
@@ -102,10 +98,6 @@ services:
    container_name: recruiter-dev-frontend
    ports:
      - "3000:80"
-  #  volumes:
-  #    - ./frontend:/frontend
-  #  environment:
-  #    - VITE_REACT_N8N_URL=${VITE_REACT_N8N_URL}
    depends_on:
      - n8n
 

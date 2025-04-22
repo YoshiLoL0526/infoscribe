@@ -6,7 +6,6 @@ class BookBase(BaseModel):
     title: str
     price: float = Field(..., gt=0)
     category: str
-    description: Optional[str] = None
     image_url: Optional[str] = None
 
 
@@ -17,8 +16,8 @@ class Book(BookBase):
         from_attributes = True
 
 
-class BookCreate(BookBase):
-    pass
+class BookList(BaseModel):
+    books: List[Book]
 
 
 class BookSearch(BaseModel):

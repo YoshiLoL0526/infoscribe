@@ -1,33 +1,41 @@
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
+from contextlib import asynccontextmanager
 
 from app.endpoints import books, headlines
 from app.core.config import settings
 from app.core.middlewares import ExceptionMiddleware
 from app.scraping.scrape_books import BookScraper
+from app.services.redis_service import RedisService
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Run scraping at startup
+    async def run_scraping():
+        scraper = BookScraper(
+            base_url=settings.BOOK_SCRAPER_URL,
+            redis_service=RedisService(),
+            max_books=settings.MAX_BOOKS_TO_SCRAPE,
+            price_limit=settings.PRICE_LIMIT,
+        )
+        books = await scraper.scrape_books()
+        if not books:
+            raise Exception("Error al inicializar la base de datos de libros")
+        return books
+
+    # Run the scraper
+    background_tasks = BackgroundTasks()
+    background_tasks.add_task(run_scraping)
+    await background_tasks.__call__()
+    yield
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=None,
+    lifespan=lifespan,
 )
-
-@app.on_event("startup")
-async def startup_event():
-    # Using BackgroundTasks to avoid blocking startup
-    async def run_scraping():
-        scraper = BookScraper(
-            base_url=settings.BOOK_SCRAPER_URL,
-            redis_host=settings.REDIS_HOST,
-            redis_port=settings.REDIS_PORT,
-        )
-        books = await scraper.scrape_books()
-
-    # Run the scraper as a background task
-    background_tasks = BackgroundTasks()
-    background_tasks.add_task(run_scraping)
-    await background_tasks.__call__()
 
 # Configurar CORS
 app.add_middleware(
@@ -58,8 +66,8 @@ async def custom_swagger_ui_html():
 
 
 @app.get("/health", tags=["status"])
-async def root():
+async def health():
     """
-    Ruta raíz que verifica que la API está en funcionamiento.
+    Ruta que verifica que la API está en funcionamiento.
     """
-    return {"status": "healthly"}
+    return {"status": "healthy"}
