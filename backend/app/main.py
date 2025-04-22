@@ -13,6 +13,10 @@ from app.services.redis_service import RedisService
 async def lifespan(app: FastAPI):
     # Run scraping at startup
     async def run_scraping():
+        if await RedisService().get_books():
+            return
+
+        # Initialize the scraper
         scraper = BookScraper(
             base_url=settings.BOOK_SCRAPER_URL,
             redis_service=RedisService(),

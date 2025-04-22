@@ -21,7 +21,7 @@ class RedisService:
         try:
             book_data = book.model_dump()
             self.redis_client.hset(f"book:{book.id}", mapping=book_data)
-            self.redis_client.sadd(f"category:{book.category}", book.id)
+            self.redis_client.sadd(f"category:{book.category.lower().replace(' ', '-')}", book.id)
             return True
         except Exception as e:
             print(f"Error storing book in Redis: {e}")
