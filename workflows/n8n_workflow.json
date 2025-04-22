@@ -310,7 +310,7 @@
     },
     {
         "createdAt": "2025-04-21T00:46:23.949Z",
-        "updatedAt": "2025-04-22T08:46:05.000Z",
+        "updatedAt": "2025-04-22T09:54:27.000Z",
         "id": "VV8VW3wNzoXBoF1L",
         "name": "Print AI Agent Workflow",
         "active": true,
@@ -385,7 +385,7 @@
             },
             {
                 "parameters": {
-                    "toolDescription": "Obtiene la información de todos los libros guardados en la base de datos. Se puede filtrar por categoría si es necesario.",
+                    "toolDescription": "Obtiene la información de todos los libros guardados. Acepta 1 parámetro: `category` para filtrar por categoría. El parámetro `category` puede obtener cualquiera de los siguientes valores: travel, mystery, historical-fiction, sequential-art, classics, philosophy, romance, womens-fiction, fiction, childrens, religion, nonfiction, music, default, science-fiction, sports-and-games, add-a-comment, fantasy, new-adult, young-adult, science, poetry, paranormal, art, psychology, autobiography, parenting, adult-fiction, humor, horror, history, food-and-drink, christian-fiction, business, biography, thriller, contemporary, spirituality, academic,self-help, historical, christian, suspense, short-stories, novels, health, politics, cultural, erotica, crime.\nLa respuesta viene definida por el siguiente formato JOSN:\n```json\n{\n  \"books\": [\n    {\n      \"title\": \"string\",\n      \"price\": 1,\n      \"category\": \"string\",\n      \"image_url\": \"string\",\n      \"id\": \"string\"\n    }\n  ]\n}\n```",
                     "url": "http://backend:7013/api/v1/books",
                     "sendQuery": true,
                     "parametersQuery": {
@@ -408,7 +408,7 @@
             },
             {
                 "parameters": {
-                    "toolDescription": "Obtiene todas las noticias y tendencias actuales en tiempo real desde Hacker News.",
+                    "toolDescription": "Obtiene todas las noticias y tendencias actuales en tiempo real desde Hacker News. Estas vienen en el siguiente formato JSON:\n```json\n{\n  \"headlines\": [\n    {\n      \"title\": \"string\",\n      \"url\": \"string\",\n      \"score\": 0\n    }\n  ]\n}\n```",
                     "url": "http://backend:7013/api/v1/headlines",
                     "sendQuery": true,
                     "parametersQuery": {
@@ -446,7 +446,7 @@
             },
             {
                 "parameters": {
-                    "toolDescription": "Busca libros guardados en la base de datos filtrando por título o categoría. Uno de los dos parámetros debe ser proveído de manera obligatoria.",
+                    "toolDescription": "Busca libros por título o categoría. Acepta 2 parámetros: `title` para filtrar por título y `category` para filtrar por categoría. Uno de los dos parámetros debe ser proveído obligatoriamente.\nEl parámetro `category` puede obtener cualquiera de los siguientes valores: travel, mystery, historical-fiction, sequential-art, classics, philosophy, romance, womens-fiction, fiction, childrens, religion, nonfiction, music, default, science-fiction, sports-and-games, add-a-comment, fantasy, new-adult, young-adult, science, poetry, paranormal, art, psychology, autobiography, parenting, adult-fiction, humor, horror, history, food-and-drink, christian-fiction, business, biography, thriller, contemporary, spirituality, academic,self-help, historical, christian, suspense, short-stories, novels, health, politics, cultural, erotica, crime.\nLa respuesta viene definida por el siguiente formato JOSN:\n```json\n{\n  \"books\": [\n    {\n      \"title\": \"string\",\n      \"price\": 1,\n      \"category\": \"string\",\n      \"image_url\": \"string\",\n      \"id\": \"string\"\n    }\n  ]\n}\n```",
                     "url": "http://backend:7013/api/v1/books/search",
                     "sendQuery": true,
                     "parametersQuery": {
@@ -565,7 +565,7 @@
             "instanceId": "d429b1253486fb9ad89953f206f7b1971109e4e8f1692d79e0bb43187175608f"
         },
         "pinData": {},
-        "versionId": "eba70b01-ecad-4bf9-8ed3-6ce4952f6810",
+        "versionId": "a1541e96-46b8-456d-85cf-b27192d1280f",
         "triggerCount": 1,
         "tags": []
     }
