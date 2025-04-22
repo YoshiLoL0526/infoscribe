@@ -182,8 +182,11 @@ const ChatMessage = ({ message }) => {
 
     // Process the entire content
     const processedContent = React.useMemo(() => {
+        // Asegurarse de que text sea siempre una cadena antes de dividir
+        const textToProcess = String(text || '');
+
         // Split by paragraphs and process each one
-        return text.split('\n\n').map((paragraph, index) => (
+        return textToProcess.split('\n\n').map((paragraph, index) => (
             <React.Fragment key={index}>
                 {index > 0 && <br />}
                 {processMessage(paragraph)}
@@ -210,10 +213,10 @@ const ChatMessage = ({ message }) => {
             <div className="flex flex-col">
                 <div
                     className={`max-w-2xl p-4 rounded-lg ${isUser
-                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none shadow-md'
-                            : isDark
-                                ? 'bg-gray-800 border-gray-700 text-gray-200 rounded-bl-none shadow-sm'
-                                : 'bg-white border border-gray-200 shadow-sm text-gray-800 rounded-bl-none'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none shadow-md'
+                        : isDark
+                            ? 'bg-gray-800 border-gray-700 text-gray-200 rounded-bl-none shadow-sm'
+                            : 'bg-white border border-gray-200 shadow-sm text-gray-800 rounded-bl-none'
                         } break-words`}
                 >
                     {processedContent}
