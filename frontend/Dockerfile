@@ -28,7 +28,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copia una configuración personalizada de Nginx (opcional)
 # Si necesitas una configuración específica de Nginx, descomenta las siguientes líneas
 # y asegúrate de tener un archivo nginx.conf en la raíz de tu proyecto
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expone el puerto en el que Nginx escuchará (por defecto es el 80)
 EXPOSE 80

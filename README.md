@@ -54,7 +54,7 @@ REDIS_PORT = 6379
 * Frontend
 
 ```env
-VITE_REACT_N8N_URL=http://route-to-n8n-webhook
+VITE_N8N_WEBHOOK_URL=http://route-to-n8n-webhook
 ```
 
 ### Start the project
