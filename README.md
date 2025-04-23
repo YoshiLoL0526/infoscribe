@@ -245,10 +245,11 @@ There are a total of 100 headlines."
 poetry run pytest
 ```
 
-🚢 Deployment
+## 🚢 Deployment
+
 The project is designed to be easily deployable using Docker Compose. The `docker-compose up -d` command is suitable for development and testing. For production deployment, consider using container orchestration platforms like Kubernetes or Docker Swarm, and ensure proper configuration of environment variables, persistent storage for Redis, and secure access to services.
 
-🙌 Acknowledgments
+## 🙌 Acknowledgments
 
 * [@cmgver](https://gitlab.com/cmgver)
 * [@luiver](https://gitlab.com/luilver)
