@@ -24,9 +24,12 @@ This project utilizes a modern technology stack to deliver a robust and efficien
 
 To get the project up and running, follow these steps:
 
+1. Clone the repository.
+2. Configure the environment variables as shown below (modify as needed for your setup).
+
 ### Environment vars
 
-* General:
+#### General
 
 ```env
 REDIS_HOST = redis
@@ -44,14 +47,14 @@ N8N_SECURE_COOKIE = false
 REMOTE_DRIVER_URL=http://selenium:4444/wd/hub
 ```
 
-* Backend:
+#### Backend
 
 ```env
 REDIS_HOST = 127.0.0.1
 REDIS_PORT = 6379
 ```
 
-* Frontend
+#### Frontend
 
 ```env
 VITE_N8N_WEBHOOK_URL=http://route-to-n8n-webhook
@@ -61,7 +64,7 @@ VITE_N8N_WEBHOOK_URL=http://route-to-n8n-webhook
 
 Once the environment variables are set, you can start the project using Docker Compose:
 
-**Command**:
+#### Command
 
 ```bash
 docker-compose up -d
@@ -241,8 +244,10 @@ There are a total of 100 headlines."
   
 ## 🧪 Unit Tests
 
+### Run tests
+
 ```bash
-poetry run pytest
+docker compose up tests
 ```
 
 ## 🚢 Deployment
