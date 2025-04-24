@@ -21,5 +21,8 @@ class Settings:
     MAX_BOOKS_TO_SCRAPE: int = int(os.getenv("MAX_BOOKS_TO_SCRAPE", 100))
     PRICE_LIMIT: float = float(os.getenv("PRICE_LIMIT", 20.0))
 
+    BACKEND_CORS_ORIGINS: list = os.getenv("BACKEND_CORS_ORIGINS", "*").split(",")
+    RATE_LIMIT: str = os.getenv("RATE_LIMIT", "1/second")
+
 
 settings = Settings()

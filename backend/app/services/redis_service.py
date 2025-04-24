@@ -73,6 +73,13 @@ class RedisService:
         except Exception as e:
             print(f"Error searching books in Redis: {e}")
             return []
+    
+    async def ping(self) -> bool:
+        """Verifica la conexión a Redis"""
+        try:
+            return self.redis_client.ping()
+        except redis.ConnectionError:
+            return False
 
 
 def get_redis_service() -> RedisService:
