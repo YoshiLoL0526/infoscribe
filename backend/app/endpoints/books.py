@@ -1,18 +1,18 @@
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 
 from app.core.config import settings
-from app.models.schemas import Book
 from app.services.redis_service import RedisService, get_redis_service
-from scrape_books import BookScraper
+from app.scraping.scrape_books import BookScraper
+from app.models.schemas import BookList
 
 router = APIRouter()
 
 
 @router.post(
     "/init",
-    response_model=List[Book],
+    response_model=BookList,
     summary="Inicializa la base de datos con libros scrapeados",
 )
 async def init_books(redis_service: RedisService = Depends(get_redis_service)):
@@ -22,8 +22,9 @@ async def init_books(redis_service: RedisService = Depends(get_redis_service)):
     """
     scraper = BookScraper(
         base_url=settings.BOOK_SCRAPER_URL,
-        redis_host=settings.REDIS_HOST,
-        redis_port=settings.REDIS_PORT,
+        redis_service=redis_service,
+        max_books=settings.MAX_BOOKS_TO_SCRAPE,
+        price_limit=settings.PRICE_LIMIT,
     )
     books = await scraper.scrape_books()
 
@@ -32,12 +33,12 @@ async def init_books(redis_service: RedisService = Depends(get_redis_service)):
             status_code=500, detail="Error al inicializar la base de datos de libros"
         )
 
-    return books
+    return BookList(books=books)
 
 
 @router.get(
     "/books",
-    response_model=List[Book],
+    response_model=BookList,
     summary="Obtiene todos los libros o filtrados por categoría",
 )
 async def get_books(
@@ -49,12 +50,12 @@ async def get_books(
     Opcionalmente se puede filtrar por categoría.
     """
     books = await redis_service.get_books(category)
-    return books
+    return BookList(books=books)
 
 
 @router.get(
     "/books/search",
-    response_model=List[Book],
+    response_model=BookList,
     summary="Busca libros por título y/o categoría",
 )
 async def search_books(
@@ -70,9 +71,9 @@ async def search_books(
     """
     if not title and not category:
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Debe proporcionar al menos un parámetro de búsqueda (título o categoría)",
         )
 
     books = await redis_service.search_books(title, category)
-    return books
+    return BookList(books=books)

@@ -46,11 +46,11 @@ const BookCard = ({ book }) => {
                                 </span>
                             )}
                         </div>
-                        {book.author && (
+                        {/* {book.author && (
                             <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
                                 <span className="font-medium">Author:</span> {book.author}
                             </p>
-                        )}
+                        )} */}
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                         <span className={`${isDark ? 'text-blue-400' : 'text-blue-600'} font-semibold text-lg`}>{book.price}</span>

@@ -21,7 +21,7 @@ class RedisService:
         try:
             book_data = book.model_dump()
             self.redis_client.hset(f"book:{book.id}", mapping=book_data)
-            self.redis_client.sadd(f"category:{book.category}", book.id)
+            self.redis_client.sadd(f"category:{book.category.lower().replace(' ', '-')}", book.id)
             return True
         except Exception as e:
             print(f"Error storing book in Redis: {e}")
@@ -73,6 +73,13 @@ class RedisService:
         except Exception as e:
             print(f"Error searching books in Redis: {e}")
             return []
+    
+    async def ping(self) -> bool:
+        """Verifica la conexión a Redis"""
+        try:
+            return self.redis_client.ping()
+        except redis.ConnectionError:
+            return False
 
 
 def get_redis_service() -> RedisService:

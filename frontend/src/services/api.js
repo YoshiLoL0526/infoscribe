@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_REACT_N8N_URL;
+const rawApi = import.meta.env.VITE_N8N_WEBHOOK_URL;
+const API_URL = (rawApi ? rawApi : '/webhook').replace(/\/$/, '');
+
 
 export const sendMessage = async (payload) => {
     try {

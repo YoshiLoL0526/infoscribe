@@ -4,34 +4,18 @@
 Script para hacer web scraping asíncrono de una página de libros y guardar los datos en Redis.
 """
 
-from dataclasses import dataclass, asdict
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
-import redis.asyncio as redis
-import json
 import logging
-import time
 import hashlib
 import os
 from typing import List, Dict, Optional
 import re
 from urllib.parse import urljoin
-from dotenv import load_dotenv
 
-load_dotenv()
-
-
-@dataclass
-class Book:
-    id: None
-    title: str
-    price: float
-    category: str
-    image_url: str
-
-    def to_dict(self):
-        return asdict(self)
+from app.services.redis_service import RedisService
+from app.models.schemas import Book
 
 
 class BookScraper:
@@ -40,8 +24,7 @@ class BookScraper:
     def __init__(
         self,
         base_url: str,
-        redis_host: str = "localhost",
-        redis_port: int = 6379,
+        redis_service: RedisService = None,
         max_books: int = 100,
         price_limit: float = 20.0,
         logs_dir: str = "logs",
@@ -60,12 +43,12 @@ class BookScraper:
             max_concurrent_requests: Número máximo de solicitudes concurrentes
         """
         self.base_url = base_url
-        self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        }
-        self.redis_url = f"redis://{redis_host}:{redis_port}"
+        self.redis_service = redis_service
         self.max_books = max_books
         self.price_limit = price_limit
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        }
         self.max_concurrent_requests = max_concurrent_requests
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
         self.total_books_collected = 0
@@ -231,40 +214,22 @@ class BookScraper:
             self.logger.error(f"Error al obtener la URL de la siguiente página: {e}")
             return None
 
-    async def save_to_redis(self, book: Book, redis_client) -> bool:
+    async def save_to_redis(self, book: Book) -> bool:
         """
-        Guarda los datos de un libro en Redis.
+        Guarda los datos de un libro utilizando el RedisService.
 
         Args:
             book: Objeto Book con los datos del libro
-            redis_client: Cliente de Redis asíncrono
 
         Returns:
             bool: True si se guardó correctamente, False en caso contrario
         """
         try:
-            # Convertir el objeto Book a diccionario
-            book_data = book.to_dict()
-
-            key = f"book:{book.id}"
-
-            # Serializar los valores para Redis
-            serialized_data = {
-                k: json.dumps(v) if isinstance(v, (dict, list)) else str(v)
-                for k, v in book_data.items()
-            }
-
-            # Guardar como hash en Redis
-            await redis_client.hset(key, mapping=serialized_data)
-
-            # Añadir a un set para facilitar la recuperación de todos los libros
-            await redis_client.sadd("all_books", key)
-
-            if book.category:
-                category_key = f"category:{book.category.lower().replace(' ', '-')}"
-                await redis_client.sadd(category_key, book.id)
-
-            return True
+            if self.redis_service:
+                return await self.redis_service.store_book(book)
+            else:
+                self.logger.warning("No hay servicio Redis configurado")
+                return False
         except Exception as e:
             self.logger.error(f"Error al guardar en Redis: {e}")
             return False
@@ -274,7 +239,6 @@ class BookScraper:
         url: str,
         category_name: str,
         session: aiohttp.ClientSession,
-        redis_client,
         all_books: List[Book],
     ) -> Dict:
         """
@@ -307,7 +271,6 @@ class BookScraper:
         self,
         category_data: Dict[str, str],
         session: aiohttp.ClientSession,
-        redis_client,
         all_books: List[Book],
     ) -> None:
         """
@@ -337,7 +300,7 @@ class BookScraper:
 
             # Procesar página
             result = await self.process_page(
-                url, category_name, session, redis_client, all_books
+                url, category_name, session, all_books
             )
             page_books = result["books"]
 
@@ -357,7 +320,7 @@ class BookScraper:
 
                 # Guardar libros en Redis y en la lista
                 for book in books_to_add:
-                    await self.save_to_redis(book, redis_client)
+                    await self.save_to_redis(book)
                     all_books.append(book)
 
                 self.total_books_collected += len(books_to_add)
@@ -384,9 +347,6 @@ class BookScraper:
         """
         all_books = []
 
-        # Crear un cliente de Redis asíncrono
-        redis_client = await redis.from_url(self.redis_url, decode_responses=True)
-
         try:
             # Crear una sesión HTTP
             timeout = aiohttp.ClientTimeout(total=30)
@@ -402,7 +362,7 @@ class BookScraper:
                 for category_data in categories:
                     task = asyncio.create_task(
                         self.scrape_category(
-                            category_data, session, redis_client, all_books
+                            category_data, session, all_books
                         )
                     )
                     tasks.append(task)
@@ -417,51 +377,3 @@ class BookScraper:
         except Exception as e:
             self.logger.error(f"Error durante el proceso de scraping: {e}")
             return all_books
-        finally:
-            # Cerrar el cliente de Redis
-            await redis_client.close()
-
-
-async def main():
-    """Función principal asíncrona que ejecuta el scraper."""
-    # URL de la página a scrapear
-    base_url = "https://books.toscrape.com"
-
-    if not os.path.exists("logs"):
-        os.mkdir("logs")
-
-    # Configuración de Redis - usar variables de entorno para Docker
-    redis_host = os.getenv("REDIS_HOST", "localhost")
-    redis_port = int(os.getenv("REDIS_PORT", 6379))
-
-    # Parámetros para el scraping
-    max_books = 100  # Entre 50-100 libros
-    price_limit = 20.0  # Libros con precio menor a £20
-    max_concurrent_requests = 5  # Limitar solicitudes concurrentes
-
-    try:
-        # Inicializar scraper asíncrono
-        scraper = BookScraper(
-            base_url=base_url,
-            redis_host=redis_host,
-            redis_port=redis_port,
-            max_books=max_books,
-            price_limit=price_limit,
-            max_concurrent_requests=max_concurrent_requests,
-        )
-
-        # Realizar scraping asíncrono
-        books = await scraper.scrape_books()
-
-        print(f"Proceso completado. Se han recopilado {len(books)} libros.")
-
-    except Exception as e:
-        logging.error(f"Error en la ejecución principal: {e}")
-        print(f"Error en la ejecución principal: {e}")
-
-
-if __name__ == "__main__":
-    # Esperar un poco para asegurar que Redis esté disponible en el entorno Docker
-    time.sleep(5)
-    # Ejecutar el bucle de eventos de asyncio
-    asyncio.run(main())

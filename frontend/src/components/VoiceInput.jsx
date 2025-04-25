@@ -1,15 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '../contexts/chat-context';
 import { useTheme } from '../contexts/theme-context';
 import { transcribeAudio } from '../services/api';
 
-const VoiceInput = ({ onVoiceInput }) => {
+const VoiceInput = ({ onVoiceInput, onProcessingChange, disabled }) => {
     const [isListening, setIsListening] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const { processMessage } = useChat();
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
     const { isDark } = useTheme();
+
+    // Notificar al componente padre cuando cambia el estado de procesamiento
+    useEffect(() => {
+        if (onProcessingChange) {
+            onProcessingChange(isProcessing || isListening);
+        }
+    }, [isProcessing, isListening, onProcessingChange]);
 
     const handleVoiceInput = async () => {
         // If already recording, stop and process
@@ -18,8 +25,8 @@ const VoiceInput = ({ onVoiceInput }) => {
             return;
         }
 
-        // If processing, don't do anything
-        if (isProcessing) return;
+        // If processing or disabled, don't do anything
+        if (isProcessing || disabled) return;
 
         // Reset state
         setIsProcessing(false);
@@ -128,7 +135,7 @@ const VoiceInput = ({ onVoiceInput }) => {
                             : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                     }`}
                 title={isListening ? "Detener grabación" : isProcessing ? "Procesando audio..." : "Entrada de voz"}
-                disabled={isProcessing}
+                disabled={isProcessing || disabled}
             >
                 {isListening ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

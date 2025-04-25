@@ -26,27 +26,42 @@ services:
    command: poetry run uvicorn app.main:app --host 0.0.0.0 --port 7013
    ports:
      - "18000:7013"
-   volumes:
-     - ./backend:/backend
    depends_on:
+     - selenium
      - redis
    environment:
-     - REDIS_HOST=${REDIS_HOST}
-     - REDIS_PORT=${REDIS_PORT}
-     - REMOTE_DRIVER_URL=${REMOTE_DRIVER_URL}
+     - REDIS_HOST=${REDIS_HOST:-redis}
+     - REDIS_PORT=${REDIS_PORT:-6379}
+     - REMOTE_DRIVER_URL=${REMOTE_DRIVER_URL:-http://selenium:4444/wd/hub}
+   healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:7013/health"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 15s
 
- frontend:
+ tests:
    build:
-     context: ./frontend
-   container_name: recruiter-dev-frontend
-   ports:
-     - "3000:80"
-  #  volumes:
-  #    - ./frontend:/frontend
-  #  environment:
-  #    - VITE_REACT_N8N_URL=${VITE_REACT_N8N_URL}
+     context: ./backend
+   container_name: recruiter-dev-tests
+   command: >
+     sh -c "
+       cd /backend &&
+       poetry run pytest -v --disable-warnings --tb=short
+     "
    depends_on:
-     - n8n
+    backend:
+      condition: service_healthy
+    selenium:
+      condition: service_started
+    redis:
+      condition: service_started
+   environment:
+     - REDIS_HOST=${REDIS_HOST:-redis}
+     - REDIS_PORT=${REDIS_PORT:-6379}
+     - REMOTE_DRIVER_URL=${REMOTE_DRIVER_URL:-http://selenium:4444/wd/hub}
+     - PYTEST_ADDOPTS="-v"
+     - PYTHONPATH=/backend
 
  n8n:
    image: n8nio/n8n
@@ -57,16 +72,16 @@ services:
      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-true}
      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-admin}
-     - N8N_HOST=${N8N_HOST:-localhost}
-     - N8N_PORT=${N8N_PORT}
-     - REDIS_HOST=${REDIS_HOST}
-     - REDIS_PORT=${REDIS_PORT}
+     - N8N_HOST=${N8N_HOST:-0.0.0.0}
+     - N8N_PORT=${N8N_PORT:-5678}
+     - REDIS_HOST=${REDIS_HOST:-redis}
+     - REDIS_PORT=${REDIS_PORT:-6379}
      - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
+     - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED:-true}
    volumes:
      - ./workflows:/workflows
      - n8n_data:/home/node/.n8n
    depends_on:
-     - redis
      - backend
    entrypoint: >
       sh -c "
@@ -76,6 +91,15 @@ services:
         n8n update:workflow --id Y0kyqHk3gar46LaE --active=true &&
         n8n start
       "
+
+ frontend:
+   build:
+     context: ./frontend
+   container_name: recruiter-dev-frontend
+   ports:
+     - "3000:80"
+   depends_on:
+     - n8n
 
 volumes:
  redis_data:
